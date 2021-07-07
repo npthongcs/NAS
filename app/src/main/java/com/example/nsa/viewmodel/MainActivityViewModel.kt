@@ -12,8 +12,8 @@ class MainActivityViewModel : ViewModel() {
         return mainRepository.responseWrapperLiveDataObserver()
     }
 
-    fun fetchResponseWrapper(query: String?, beginDate: String?, sort: String?, newsDesk: String?, page: Int, isQuery: Boolean){
-        mainRepository.responseWrapperCallAPI(query,beginDate,sort,newsDesk,page,isQuery)
+    fun fetchResponseWrapper(query: String?, beginDate: String?, sort: String?, newsDesk: String?, page: Int){
+        mainRepository.responseWrapperCallAPI(query,beginDate,sort,newsDesk,page)
     }
 
 }

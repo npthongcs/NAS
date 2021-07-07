@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,7 +29,7 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
     var isLoad = false
     var listDocs = ArrayList<Docs>()
     var isQuery: Boolean = false
-    private val newsAdapter = NewsAdapter()
+    private lateinit var newsAdapter: NewsAdapter
     private lateinit var binding: ActivityMainBinding
     private var viewModel: MainActivityViewModel = MainActivityViewModel()
 
@@ -50,7 +52,7 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
                     Log.d("page count",pageCount.toString())
                     pageCount++
                     isQuery = false
-                    viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount,false)
+                    viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
                 }
             }
         })
@@ -60,10 +62,11 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
     private fun setupBinding() {
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
         binding.executePendingBindings()
+        newsAdapter = NewsAdapter(listDocs)
 
         binding.rvNews.apply {
             setHasFixedSize(true)
-            layoutManager = StaggeredGridLayoutManager(4,StaggeredGridLayoutManager.VERTICAL)
+            layoutManager = StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL)
             (layoutManager as StaggeredGridLayoutManager).gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE;
             adapter = newsAdapter
         }
@@ -74,9 +77,8 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
         viewModel.getResponseWrapperLiveDataObserver().observe(this,{
             if (it!=null){
                 Log.d("response wrapper",it.toString())
-                if (isQuery) listDocs.clear()
+                if (pageCount == 1) listDocs.clear()
                 listDocs.addAll(it.response.docs)
-                newsAdapter.setDataAdapter(listDocs)
                 newsAdapter.notifyDataSetChanged()
                 isLoad = false
             }
@@ -96,8 +98,7 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
                     Log.d("sort",sort.toString())
                     mQuery = query
                     pageCount = 1
-                    isQuery = true
-                    viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount,true)
+                    viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
                 }
                 return true
             }
@@ -138,12 +139,15 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
         Log.d("news desk",newsDesk.toString())
         Log.d("sort",sort.toString())
         pageCount = 1
-        isQuery = true
-        viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount,true)
+        viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
     }
 
     override fun onItemClick(data: Docs) {
         Log.d("headline click",data.headline.main)
+        val builder = CustomTabsIntent.Builder()
+        builder.setToolbarColor(ContextCompat.getColor(this,R.color.design_default_color_primary))
+        builder.setShareState(CustomTabsIntent.SHARE_STATE_DEFAULT)
+
     }
 
 }

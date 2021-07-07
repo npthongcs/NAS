@@ -14,13 +14,8 @@ import com.example.nsa.model.Docs
 import com.example.nsa.model.Headline
 import com.example.nsa.model.StandardItem
 
-class NewsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    var mDocs = ArrayList<Docs>()
+class NewsAdapter(var mDocs: ArrayList<Docs>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var newsOnClickListener: NewsOnClickListener? = null
-
-    fun setDataAdapter(data: ArrayList<Docs>){
-        this.mDocs = data
-    }
 
     fun setOnCallBackListener(newsOnClickListener: NewsOnClickListener){
         this.newsOnClickListener = newsOnClickListener

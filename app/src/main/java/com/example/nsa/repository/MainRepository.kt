@@ -12,7 +12,6 @@ import retrofit2.Response
 
 class MainRepository {
     private val apiKey = "GKKclywskYxAotfUsGb7tgaNqBIgWQl5"
-    private var listDocs: ArrayList<Docs> = ArrayList()
     private var responseWrapperLiveData: MutableLiveData<ResponseWrapper> = MutableLiveData()
     private val retroInstance: ApiService = RetroInstance.getRetroInstance().create(ApiService::class.java)
 
@@ -21,7 +20,7 @@ class MainRepository {
     }
 
 
-    fun responseWrapperCallAPI(query: String?, beginDate: String?, sort: String?, newsDesk: String?, page: Int, isQuery: Boolean){
+    fun responseWrapperCallAPI(query: String?, beginDate: String?, sort: String?, newsDesk: String?, page: Int){
         val call = retroInstance.getResponse(query,beginDate,sort,newsDesk,page,apiKey)
         call.enqueue(object : Callback<ResponseWrapper>{
             override fun onResponse(
