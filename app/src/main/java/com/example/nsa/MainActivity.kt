@@ -7,6 +7,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.nsa.adapter.NewsAdapter
 import com.example.nsa.databinding.ActivityMainBinding
@@ -24,10 +25,11 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
     var newsDesk: String? = null
     var pageCount = 1
     var isLoad = false
+    var listDocs = ArrayList<Docs>()
+    var isQuery: Boolean = false
     private val newsAdapter = NewsAdapter()
     private lateinit var binding: ActivityMainBinding
     private var viewModel: MainActivityViewModel = MainActivityViewModel()
-    var scrollListener: RecyclerViewLoadMoreScroll? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,19 +43,17 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
     }
 
     private fun initScrollListener(){
-        scrollListener = RecyclerViewLoadMoreScroll(binding.rvNews.layoutManager as StaggeredGridLayoutManager)
-        scrollListener!!.setOnLoadMoreListener(object : OnLoadMoreListener {
+        binding.rvNews.addOnScrollListener(object : RecyclerViewLoadMoreScroll(binding.rvNews.layoutManager as StaggeredGridLayoutManager){
             override fun onLoadMore() {
-                loadMoreData()
+                if (!isLoad){
+                    isLoad = true
+                    Log.d("page count",pageCount.toString())
+                    pageCount++
+                    isQuery = false
+                    viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount,false)
+                }
             }
         })
-        binding.rvNews.addOnScrollListener(scrollListener!!)
-    }
-
-    private fun loadMoreData(){
-        Log.d("pageCount",pageCount.toString())
-        pageCount++
-        viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount,false)
     }
 
 
@@ -74,11 +74,11 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
         viewModel.getResponseWrapperLiveDataObserver().observe(this,{
             if (it!=null){
                 Log.d("response wrapper",it.toString())
-                val currentSize = newsAdapter.itemCount
-                newsAdapter.setDataAdapter(viewModel.listDocs)
+                if (isQuery) listDocs.clear()
+                listDocs.addAll(it.response.docs)
+                newsAdapter.setDataAdapter(listDocs)
                 newsAdapter.notifyDataSetChanged()
-                //newsAdapter.notifyItemRangeInserted(currentSize,viewModel.listDocs.size-currentSize)
-                scrollListener?.setLoaded()
+                isLoad = false
             }
         })
     }
@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
                     Log.d("sort",sort.toString())
                     mQuery = query
                     pageCount = 1
+                    isQuery = true
                     viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount,true)
                 }
                 return true
@@ -137,6 +138,7 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
         Log.d("news desk",newsDesk.toString())
         Log.d("sort",sort.toString())
         pageCount = 1
+        isQuery = true
         viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount,true)
     }
 

@@ -20,9 +20,6 @@ class MainRepository {
         return responseWrapperLiveData
     }
 
-    fun getListDocs(): ArrayList<Docs>{
-        return listDocs
-    }
 
     fun responseWrapperCallAPI(query: String?, beginDate: String?, sort: String?, newsDesk: String?, page: Int, isQuery: Boolean){
         val call = retroInstance.getResponse(query,beginDate,sort,newsDesk,page,apiKey)
@@ -32,8 +29,6 @@ class MainRepository {
                 response: Response<ResponseWrapper>
             ) {
                 if (response.isSuccessful) {
-                    if (isQuery) listDocs.clear()
-                    response.body()?.let { listDocs.addAll(it.response.docs) }
                     responseWrapperLiveData.postValue(response.body())
                 }
                 else responseWrapperLiveData.postValue(null)

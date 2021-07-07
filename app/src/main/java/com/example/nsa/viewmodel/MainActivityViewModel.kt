@@ -7,7 +7,6 @@ import com.example.nsa.repository.MainRepository
 
 class MainActivityViewModel : ViewModel() {
     private val mainRepository = MainRepository()
-    val listDocs = mainRepository.getListDocs()
 
     fun getResponseWrapperLiveDataObserver(): MutableLiveData<ResponseWrapper>{
         return mainRepository.responseWrapperLiveDataObserver()
