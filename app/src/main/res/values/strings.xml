@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">News Article Search</string>
+    <string-array name="sort_array">
+        <item>None</item>
+        <item>Oldest</item>
+        <item>Newest</item>
+    </string-array>
+</resources>
