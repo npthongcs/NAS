@@ -3,9 +3,11 @@ package com.example.nsa.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.nsa.R
 import com.example.nsa.databinding.OnlyTextItemBinding
 import com.example.nsa.databinding.StandardItemBinding
@@ -35,12 +37,12 @@ class NewsAdapter(var mDocs: ArrayList<Docs>) : RecyclerView.Adapter<RecyclerVie
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return if (viewType==1) StandardViewHolder(StandardItemBinding.inflate(inflater)).apply {
+        return if (viewType==1) StandardViewHolder(StandardItemBinding.inflate(inflater,parent,false)).apply {
             itemView.setOnClickListener {
                 this@NewsAdapter.newsOnClickListener?.onItemClick(mDocs[bindingAdapterPosition])
             }
         }
-        else OnlyTextViewHolder(OnlyTextItemBinding.inflate(inflater)).apply {
+        else OnlyTextViewHolder(OnlyTextItemBinding.inflate(inflater,parent,false)).apply {
             itemView.setOnClickListener {
                 this@NewsAdapter.newsOnClickListener?.onItemClick(mDocs[bindingAdapterPosition])
             }
@@ -80,7 +82,8 @@ class NewsAdapter(var mDocs: ArrayList<Docs>) : RecyclerView.Adapter<RecyclerVie
         fun loadThumbnail(thumbnailID : ImageView,url: String?){
             Glide.with(thumbnailID.context)
                 .load("$baseURL$url")
-                .override(300,300)
+                .override(250,250)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.drawable.ic_launcher_foreground)
                 .error(R.drawable.ic_launcher_background)
                 .into(thumbnailID)

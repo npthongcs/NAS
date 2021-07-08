@@ -1,11 +1,13 @@
 package com.example.nsa.repository
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.nsa.ApiService
 import com.example.nsa.RetroInstance
 import com.example.nsa.model.Docs
 import com.example.nsa.model.ResponseWrapper
+import com.example.nsa.network.CheckNetwork
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -19,7 +21,6 @@ class MainRepository {
         return responseWrapperLiveData
     }
 
-
     fun responseWrapperCallAPI(query: String?, beginDate: String?, sort: String?, newsDesk: String?, page: Int){
         val call = retroInstance.getResponse(query,beginDate,sort,newsDesk,page,apiKey)
         call.enqueue(object : Callback<ResponseWrapper>{
@@ -28,7 +29,7 @@ class MainRepository {
                 response: Response<ResponseWrapper>
             ) {
                 if (response.isSuccessful) {
-                    responseWrapperLiveData.postValue(response.body())
+                    responseWrapperLiveData.value = response.body()
                 }
                 else responseWrapperLiveData.postValue(null)
             }

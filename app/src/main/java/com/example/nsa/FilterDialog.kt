@@ -47,16 +47,15 @@ class FilterDialog : DialogFragment() {
         val cbSports = view.findViewById<CheckBox>(R.id.cbSports)
 
         etBeginDate.setOnClickListener {
-            Log.d("begin date","is clicked")
             val calendar = Calendar.getInstance()
             val day = calendar.get(Calendar.DATE)
             val month = calendar.get(Calendar.MONTH)
             val year = calendar.get(Calendar.YEAR)
+            val simpleDateFormat = SimpleDateFormat("yyyy/MM/dd")
             val datePickerDialog: DatePickerDialog? =
                 context?.let { it1 ->
                     DatePickerDialog(it1, { _: DatePicker, i: Int, i1: Int, i2: Int ->
                         calendar.set(i,i1,i2)
-                        val simpleDateFormat = SimpleDateFormat("yyyy/MM/dd")
                         beginDate = simpleDateFormat.format(calendar.time)
                         etBeginDate.setText(simpleDateFormat.format(calendar.time))
                     },year,month,day)

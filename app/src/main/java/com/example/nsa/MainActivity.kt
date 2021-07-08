@@ -1,5 +1,6 @@
 package com.example.nsa
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -9,7 +10,9 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.nsa.adapter.NewsAdapter
 import com.example.nsa.databinding.ActivityMainBinding
@@ -17,6 +20,7 @@ import com.example.nsa.listener.NewsOnClickListener
 import com.example.nsa.listener.OnLoadMoreListener
 import com.example.nsa.model.Docs
 import com.example.nsa.model.Filter
+import com.example.nsa.network.CheckNetwork
 import com.example.nsa.viewmodel.MainActivityViewModel
 
 class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, NewsOnClickListener {
@@ -27,11 +31,11 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
     var newsDesk: String? = null
     var pageCount = 1
     var isLoad = false
-    var listDocs = ArrayList<Docs>()
-    var isQuery: Boolean = false
+    private var listDocs = ArrayList<Docs>()
     private lateinit var newsAdapter: NewsAdapter
     private lateinit var binding: ActivityMainBinding
     private var viewModel: MainActivityViewModel = MainActivityViewModel()
+    lateinit var layoutManager: StaggeredGridLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,11 +55,25 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
                     isLoad = true
                     Log.d("page count",pageCount.toString())
                     pageCount++
-                    isQuery = false
-                    viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
+                    if (CheckNetwork.isConnected(this@MainActivity)){
+                        viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
+                    }
                 }
             }
         })
+//        binding.rvNews.addOnScrollListener(object : RecyclerView.OnScrollListener(){
+//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                super.onScrolled(recyclerView, dx, dy)
+//                if (!recyclerView.canScrollVertically(1) && dy>0){
+//                    if (!isLoad){
+//                        isLoad = true
+//                        Log.d("page count",pageCount.toString())
+//                        pageCount++
+//                        viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
+//                    }
+//                }
+//            }
+//        })
     }
 
 
@@ -63,11 +81,14 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
         binding.executePendingBindings()
         newsAdapter = NewsAdapter(listDocs)
+        layoutManager = StaggeredGridLayoutManager(4,LinearLayoutManager.VERTICAL)
+//        binding.rvNews.addItemDecoration(GridItemDecoration(10,4))
+        layoutManager.gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS
+//        layoutManager = GridLayoutManager(this,4)
 
         binding.rvNews.apply {
             setHasFixedSize(true)
-            layoutManager = StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL)
-            (layoutManager as StaggeredGridLayoutManager).gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_NONE;
+            layoutManager = this@MainActivity.layoutManager
             adapter = newsAdapter
         }
     }
@@ -76,11 +97,18 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
         viewModel = ViewModelProvider(this).get(MainActivityViewModel::class.java)
         viewModel.getResponseWrapperLiveDataObserver().observe(this,{
             if (it!=null){
-                Log.d("response wrapper",it.toString())
-                if (pageCount == 1) listDocs.clear()
-                listDocs.addAll(it.response.docs)
-                newsAdapter.notifyDataSetChanged()
-                isLoad = false
+                if (pageCount == 1) {
+                    listDocs.clear()
+                    listDocs.addAll(it.response.docs)
+                    Log.d("ABC","search")
+                    newsAdapter.notifyDataSetChanged()
+                } else {
+                    Log.d("ABC", "not search")
+                    val currentSize = newsAdapter.itemCount
+                    listDocs.addAll(it.response.docs)
+                    newsAdapter.notifyItemRangeInserted(currentSize, it.response.docs.size)
+                    isLoad = false
+                }
             }
         })
     }
@@ -98,7 +126,9 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
                     Log.d("sort",sort.toString())
                     mQuery = query
                     pageCount = 1
-                    viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
+                    if (CheckNetwork.isConnected(this@MainActivity)){
+                        viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
+                    }
                 }
                 return true
             }
@@ -116,7 +146,6 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
             R.id.action_filter -> {
                 val dialog = FilterDialog()
                 dialog.show(supportFragmentManager,"Filter dialog")
-                Log.d("filter icon","is clicked")
                 return true
             }
         }
@@ -124,7 +153,6 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
     }
 
     override fun finishFilterDialog(filter: Filter) {
-        Log.d("data when click save",filter.toString())
         sort = if (filter.sort=="None") null else filter.sort?.lowercase()
         beginDate = filter.beginDate
         if (filter.newsDesk.size>0){
@@ -135,20 +163,25 @@ class MainActivity : AppCompatActivity(), FilterDialog.FilterDialogListener, New
 
         beginDate = beginDate?.replace("/","")
 
+        Log.d("query",mQuery!!)
         Log.d("begin date", beginDate.toString())
         Log.d("news desk",newsDesk.toString())
         Log.d("sort",sort.toString())
         pageCount = 1
-        viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
+        if (CheckNetwork.isConnected(this@MainActivity)){
+            viewModel.fetchResponseWrapper(mQuery,beginDate,sort,newsDesk,pageCount)
+        }
     }
 
     override fun onItemClick(data: Docs) {
-        Log.d("headline click",data.headline.main)
         val builder = CustomTabsIntent.Builder()
-        builder.setToolbarColor(ContextCompat.getColor(this,R.color.design_default_color_primary))
-        builder.setShareState(CustomTabsIntent.SHARE_STATE_DEFAULT)
+        builder.setShareState(CustomTabsIntent.SHARE_STATE_ON)
+        builder.setShowTitle(true)
 
+        val customTabsIntent = builder.build()
+        customTabsIntent.launchUrl(this, Uri.parse(data.web_url))
     }
 
 }
+
 

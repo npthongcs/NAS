@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 abstract class RecyclerViewLoadMoreScroll : RecyclerView.OnScrollListener {
-    private var visibleThreshold = 20
+    private var visibleThreshold = 10
     private var isLoading: Boolean = false
     private var lastVisibleItem: Int = 0
     private var totalItemCount:Int = 0
