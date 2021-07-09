@@ -15,23 +15,29 @@ import retrofit2.Response
 class MainRepository {
     private val apiKey = "GKKclywskYxAotfUsGb7tgaNqBIgWQl5"
     private var responseWrapperLiveData: MutableLiveData<ResponseWrapper> = MutableLiveData()
-    private val retroInstance: ApiService = RetroInstance.getRetroInstance().create(ApiService::class.java)
+    private val retroInstance: ApiService =
+        RetroInstance.getRetroInstance().create(ApiService::class.java)
 
-    fun responseWrapperLiveDataObserver(): MutableLiveData<ResponseWrapper>{
+    fun responseWrapperLiveDataObserver(): MutableLiveData<ResponseWrapper> {
         return responseWrapperLiveData
     }
 
-    fun responseWrapperCallAPI(query: String?, beginDate: String?, sort: String?, newsDesk: String?, page: Int){
-        val call = retroInstance.getResponse(query,beginDate,sort,newsDesk,page,apiKey)
-        call.enqueue(object : Callback<ResponseWrapper>{
+    fun responseWrapperCallAPI(
+        query: String?,
+        beginDate: String?,
+        sort: String?,
+        newsDesk: String?,
+        page: Int
+    ) {
+        val call = retroInstance.getResponse(query, beginDate, sort, newsDesk, page, apiKey)
+        call.enqueue(object : Callback<ResponseWrapper> {
             override fun onResponse(
                 call: Call<ResponseWrapper>,
                 response: Response<ResponseWrapper>
             ) {
                 if (response.isSuccessful) {
                     responseWrapperLiveData.value = response.body()
-                }
-                else responseWrapperLiveData.postValue(null)
+                } else responseWrapperLiveData.postValue(null)
             }
 
             override fun onFailure(call: Call<ResponseWrapper>, t: Throwable) {

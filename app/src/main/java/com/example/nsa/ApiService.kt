@@ -1,4 +1,5 @@
 package com.example.nsa
+
 import com.example.nsa.model.ResponseWrapper
 import retrofit2.Call
 import retrofit2.http.GET
@@ -13,5 +14,5 @@ interface ApiService {
         @Query("fq") newsDesk: String?,
         @Query("page") page: Int,
         @Query("api-key") key: String
-    ) : Call<ResponseWrapper>
+    ): Call<ResponseWrapper>
 }

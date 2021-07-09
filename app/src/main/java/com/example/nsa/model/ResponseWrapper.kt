@@ -2,7 +2,7 @@ package com.example.nsa.model
 
 data class ResponseWrapper(val response: Response)
 
-data class Response (val docs: ArrayList<Docs>)
+data class Response(val docs: ArrayList<Docs>)
 
 data class Docs(
     val web_url: String,

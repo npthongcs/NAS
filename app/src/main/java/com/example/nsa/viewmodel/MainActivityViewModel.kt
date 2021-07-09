@@ -8,12 +8,18 @@ import com.example.nsa.repository.MainRepository
 class MainActivityViewModel : ViewModel() {
     private val mainRepository = MainRepository()
 
-    fun getResponseWrapperLiveDataObserver(): MutableLiveData<ResponseWrapper>{
+    fun getResponseWrapperLiveDataObserver(): MutableLiveData<ResponseWrapper> {
         return mainRepository.responseWrapperLiveDataObserver()
     }
 
-    fun fetchResponseWrapper(query: String?, beginDate: String?, sort: String?, newsDesk: String?, page: Int){
-        mainRepository.responseWrapperCallAPI(query,beginDate,sort,newsDesk,page)
+    fun fetchResponseWrapper(
+        query: String?,
+        beginDate: String?,
+        sort: String?,
+        newsDesk: String?,
+        page: Int
+    ) {
+        mainRepository.responseWrapperCallAPI(query, beginDate, sort, newsDesk, page)
     }
 
 }

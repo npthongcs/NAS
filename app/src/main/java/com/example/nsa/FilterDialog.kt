@@ -21,7 +21,7 @@ class FilterDialog : DialogFragment() {
 
     var beginDate: String? = null
 
-    interface FilterDialogListener{
+    interface FilterDialogListener {
         fun finishFilterDialog(filter: Filter)
     }
 
@@ -30,7 +30,7 @@ class FilterDialog : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_filter,container,false)
+        return inflater.inflate(R.layout.fragment_filter, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -55,22 +55,22 @@ class FilterDialog : DialogFragment() {
             val datePickerDialog: DatePickerDialog? =
                 context?.let { it1 ->
                     DatePickerDialog(it1, { _: DatePicker, i: Int, i1: Int, i2: Int ->
-                        calendar.set(i,i1,i2)
+                        calendar.set(i, i1, i2)
                         beginDate = simpleDateFormat.format(calendar.time)
                         etBeginDate.setText(simpleDateFormat.format(calendar.time))
-                    },year,month,day)
+                    }, year, month, day)
                 }
             datePickerDialog?.show()
         }
 
         btnSave.setOnClickListener {
-            val listener: FilterDialogListener = activity as FilterDialogListener
             val sort = spinnerSort.selectedItem.toString()
             val newsDesk: ArrayList<String> = ArrayList()
+            val listener: FilterDialogListener = activity as FilterDialogListener
             if (cbArts.isChecked) newsDesk.add(cbArts.text.toString())
             if (cbFashion.isChecked) newsDesk.add(cbFashion.text.toString())
             if (cbSports.isChecked) newsDesk.add(cbSports.text.toString())
-            val filter = Filter(beginDate,sort,newsDesk)
+            val filter = Filter(beginDate, sort, newsDesk)
             listener.finishFilterDialog(filter)
             dismiss()
         }
